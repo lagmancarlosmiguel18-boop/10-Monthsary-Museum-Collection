@@ -31,8 +31,8 @@ body.controls-blocked #touch,body.controls-blocked #mobileActions{visibility:hid
 <script>window.__bootTimer=setTimeout(()=>{document.getElementById('loadMessage').textContent='The 3D engine could not load. Check your internet connection, enable WebGL, and open this file in a current browser or deploy it as index.html.'},20000);</script>
 <script type="module">
 // Optional: paste the same PUBLIC project settings here before deployment.
-const DEFAULT_URL = 'https://yxxrhydehevytciytfjv.supabase.co';
-const DEFAULT_KEY = 'sb_publishable_8bcEMvpQ4bK4_RAOcyoo6A_1qgZ4Uq7';
+const DEFAULT_URL = '';
+const DEFAULT_KEY = '';
 const $=id=>document.getElementById(id), MAX=24, LIMIT=25*1024*1024;
 let THREE;
 try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js')}catch(e){$('loadMessage').textContent='Could not load the 3D library. Check your connection or CDN restrictions.';throw e}
@@ -90,12 +90,72 @@ for(let z=-8;z>=-50;z-=18){box(3,.22,1.1,mat('#c58e80'),0,.8,z);for(const x of [
 function heartGeometry(){const s=new THREE.Shape();s.moveTo(0,-.4);s.bezierCurveTo(-1,.2,-.6,1,0,.5);s.bezierCurveTo(.6,1,1,.2,0,-.4);return new THREE.ExtrudeGeometry(s,{depth:.16,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.06,bevelThickness:.06})}
 const heartGeo=heartGeometry();const sculpture=mesh(heartGeo,rose,0,2,7);sculpture.scale.setScalar(1.4);cylinder(1.3,1.5,.5,cream,0,.25,7);obstacles.push({x:0,z:7,r:1.8});
 function label(text,width=3,height=.6){const c=document.createElement('canvas');c.width=768;c.height=160;const ctx=c.getContext('2d');ctx.fillStyle='#f1f7fc';ctx.fillRect(0,0,768,160);ctx.fillStyle='#557391';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='32px Georgia';ctx.fillText(text,384,80,720);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(width,height),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}))}
-const title=label('A collection of us',8,1.4);title.position.set(0,4.2,-66.7);scene.add(title);
+// The anniversary wall uses soft translucent plaques, luminous lettering, and a subtle drop shadow.
+function glowingWallLabel(lines,width,height,kind='message'){
+ const c=document.createElement('canvas');c.width=2048;c.height=kind==='title'?360:620;const ctx=c.getContext('2d');
+ const x=26,y=22,w=c.width-52,h=c.height-44,r=48;
+ ctx.save();ctx.shadowColor='rgba(72,105,146,.32)';ctx.shadowBlur=30;ctx.shadowOffsetY=10;ctx.fillStyle=kind==='title'?'rgba(250,253,255,.88)':'rgba(250,253,255,.86)';
+ ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();ctx.restore();
+ ctx.strokeStyle='rgba(255,255,255,.96)';ctx.lineWidth=5;ctx.stroke();ctx.textAlign='center';ctx.textBaseline='middle';
+ if(kind==='title'){
+  ctx.font='68px Georgia, serif';ctx.shadowColor='rgba(89,132,178,.72)';ctx.shadowBlur=24;ctx.shadowOffsetY=5;ctx.fillStyle='#7199bf';ctx.fillText(lines[0],c.width/2,c.height/2+1,c.width-140);
+  ctx.shadowColor='rgba(51,75,104,.36)';ctx.shadowBlur=6;ctx.shadowOffsetY=5;ctx.fillStyle='#5f86ad';ctx.fillText(lines[0],c.width/2,c.height/2,c.width-140);
+ }else{
+  const ys=[112,226,326,426,526];
+  lines.forEach((line,i)=>{
+   const heading=i===0;ctx.font=heading?'bold 62px Georgia, serif':'42px Georgia, serif';
+   ctx.shadowColor=heading?'rgba(190,128,167,.62)':'rgba(113,157,197,.58)';ctx.shadowBlur=heading?22:17;ctx.shadowOffsetY=0;ctx.fillStyle=heading?'#b77f9f':'#536f8c';ctx.fillText(line,c.width/2,ys[i],c.width-150);
+   ctx.shadowColor='rgba(48,65,88,.40)';ctx.shadowBlur=7;ctx.shadowOffsetY=5;ctx.fillStyle=heading?'#a66f91':'#48637f';ctx.fillText(line,c.width/2,ys[i],c.width-150);
+  });
+ }
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
+ return new THREE.Mesh(new THREE.PlaneGeometry(width,height),new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false,toneMapped:false}));
+}
+const title=glowingWallLabel(['A collection of us'],8.8,1.45,'title');title.position.set(0,5.18,-66.68);scene.add(title);
+const monthsaryMessage=glowingWallLabel([
+ 'Boo, Happy 10th Monthsary! ♡',
+ 'Kahit dakal kung pagkukulang keka, lalo na king pera  rugo HAHAHA,',
+ 'at napakatakaw ko pa salamat dahil iniintindi mo pa rin ako.',
+ 'Dakal kung lugud keka! hangga porac guagua Sana dakal pang monthsary ing',
+ 'pagsalubungan tamu. Ikaw pa rin ang favorite person ko ily. ♡'
+],14.2,3.85,'message');monthsaryMessage.position.set(0,2.62,-66.65);scene.add(monthsaryMessage);
 const stars=new THREE.BufferGeometry(),starPositions=[];for(let i=0;i<260;i++)starPositions.push((Math.random()-.5)*160,18+Math.random()*40,(Math.random()-.5)*180-20);stars.setAttribute('position',new THREE.Float32BufferAttribute(starPositions,3));scene.add(new THREE.Points(stars,new THREE.PointsMaterial({color:'#fff9df',size:.12})));
 const frames=[],clickTargets=[];
 for(let i=0;i<MAX;i++){const side=i%2===0?-1:1,z=3-Math.floor(i/2)*5.6,g=new THREE.Group();g.position.set(side*10.72,2.8,z);g.rotation.y=side===-1?Math.PI/2:-Math.PI/2;scene.add(g);box(3.65,2.85,.14,gold,0,0,0,g);box(3.4,2.6,.17,cream,0,0,.04,g);const screen=mesh(new THREE.PlaneGeometry(3.13,2.3),new THREE.MeshBasicMaterial({color:'#cfdfef'}),0,0,.14,g);screen.userData.index=i;clickTargets.push(screen);const caption=label('A memory belongs here',3.3,.44);caption.position.set(0,-1.8,.14);g.add(caption);frames.push({g,screen,caption,texture:null,item:null});}
 function tube(points,r,material,parent){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));return mesh(new THREE.TubeGeometry(curve,24,r,8,false),material,0,0,0,parent)}
 function oval(r,material,x,y,z,sx,sy,sz,parent){const m=sphere(r,material,x,y,z,parent);m.scale.set(sx,sy,sz);return m}
+// Tiny original 3D animal stickers decorate the wall: a cat, puppy, chick, and duck.
+function wallAnimal(kind,x,y,scale=1){
+ const g=new THREE.Group();g.position.set(x,y,-66.34);g.scale.setScalar(scale);scene.add(g);
+ const dark=mat(kind==='cat'?'#42404e':'#65515a'),creamFur=mat(kind==='dog'?'#e8bf91':'#fff0c0'),pinkInner=mat('#edabb8'),eyeMat=mat('#473b45'),white=mat('#fffaf1'),yellow=mat('#ffd76d'),orange=mat('#ed995f'),wing=mat(kind==='duck'?'#fff1b2':'#ffe18a');
+ const bird=kind==='chick'||kind==='duck';const bodyMat=kind==='cat'?dark:kind==='dog'?creamFur:yellow;
+ oval(.33,bodyMat,0,.34,0,.98,1.0,.42,g);
+ if(kind==='cat'){
+  oval(.29,dark,0,.72,.02,1,1,.52,g);
+  for(const sx of [-1,1]){const ear=mesh(new THREE.ConeGeometry(.13,.34,3),dark,sx*.18,.98,.01,g);ear.rotation.z=sx*-.18;const inner=mesh(new THREE.ConeGeometry(.075,.22,3),pinkInner,sx*.18,.98,.075,g);inner.rotation.z=sx*-.18;oval(.035,white,sx*.105,.755,.285,.8,1,.35,g);oval(.019,eyeMat,sx*.105,.755,.315,.8,1,.35,g)}
+  oval(.045,pinkInner,0,.66,.305,1,.7,.45,g);tube([[0,.63,.30],[0,.58,.31],[-.04,.57,.30]],.008,eyeMat,g);tube([[0,.58,.31],[.04,.57,.30]],.008,eyeMat,g);
+  tube([[.2,.3,-.02],[.42,.42,-.02],[.43,.65,-.01],[.36,.73,0]],.035,dark,g);
+ }else if(kind==='dog'){
+  oval(.29,creamFur,0,.72,.03,1,1,.55,g);
+  for(const sx of [-1,1]){oval(.12,dark,sx*.245,.76,.03,.7,1.45,.55,g);oval(.04,white,sx*.105,.755,.33,.8,1,.35,g);oval(.021,eyeMat,sx*.105,.755,.36,.8,1,.35,g)}
+  oval(.16,white,0,.64,.28,1.05,.65,.5,g);oval(.05,eyeMat,0,.67,.44,1,.65,.4,g);tube([[-.06,.57,.36],[0,.54,.38],[.06,.57,.36]],.009,eyeMat,g);
+  const tongue=oval(.045,mat('#e88c9e'),0,.51,.365,.75,.8,.3,g);
+ }else{
+  oval(.25,yellow,0,.68,.03,1.05,1,.55,g);
+  for(const sx of [-1,1]){oval(.15,wing,sx*.27,.35,.10,.8,.65,.45,g);oval(.033,white,sx*.105,.71,.31,.8,1,.35,g);oval(.018,eyeMat,sx*.105,.71,.34,.8,1,.35,g)}
+  const beak=mesh(new THREE.ConeGeometry(.075,.17,4),orange,0,.63,.36,g);beak.rotation.x=Math.PI/2;
+  if(kind==='duck'){oval(.1,orange,-.16,.08,.12,1.05,.35,.45,g);oval(.1,orange,.16,.08,.12,1.05,.35,.45,g);}
+  else {mesh(new THREE.ConeGeometry(.075,.18,4),mat('#dca55d'),0,.99,-.015,g);}
+ }
+ // Blush, sparkles, and a tiny heart make each sticker feel soft and affectionate.
+ for(const sx of [-1,1])oval(.035,pinkInner,sx*.2, bird?.6:.57,.31,.95,.6,.3,g);
+ const heart=mesh(heartGeo,mat('#d995b6'),.36,.98,.03,g);heart.scale.setScalar(.12);heart.rotation.z=.12;
+ return g;
+}
+wallAnimal('cat',-8.35,3.18,1.08);wallAnimal('dog',8.35,3.18,1.08);wallAnimal('chick',-8.25,1.05,.95);wallAnimal('duck',8.25,1.05,.95);
+// Small star-shaped accents around the four animal stickers.
+function wallStar(x,y,size,color){const shape=new THREE.Shape();for(let i=0;i<10;i++){const a=Math.PI/2+i*Math.PI/5,r=i%2===0?size:size*.45,px=Math.cos(a)*r,py=Math.sin(a)*r;if(i===0)shape.moveTo(px,py);else shape.lineTo(px,py)}shape.closePath();const star=mesh(new THREE.ShapeGeometry(shape),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.9,side:THREE.DoubleSide}),x,y,-66.3);return star}
+wallStar(-7.25,4.15,.16,'#e8b2ca');wallStar(7.28,4.14,.16,'#c0d8f3');wallStar(-7.25,.85,.13,'#c0d8f3');wallStar(7.25,.85,.13,'#e8b2ca');
 function avatar(c){
  const g=new THREE.Group(),rig=new THREE.Group();g.add(rig);
  const sweater=mat(c),face=mat('#f2d4bb'),hair=mat('#604438'),ink=mat('#42342f'),white=mat('#fff8e9'),pants=mat('#55515c');
